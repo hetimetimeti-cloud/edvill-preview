@@ -15,16 +15,43 @@ const moodMap={
   violet:{time:4.05,label:'RGB',name:'színes hangulat'}
 };
 
+function applyMediaUrl(url){
+  mediaUrl=url;
+  [heroVideo,...lightingVideos].forEach(v=>{
+    if(!v)return;
+    v.src=url;
+    v.preload='auto';
+    v.load();
+  });
+}
+
 async function loadPreviewVideo(){
+  const hqUrl='media/edvill-scroll-hq.mp4';
+  try{
+    const check=await fetch(hqUrl,{method:'HEAD',cache:'no-cache'});
+    if(check.ok){
+      applyMediaUrl(hqUrl);
+      return;
+    }
+  }catch(err){
+    console.warn('HQ video not available yet, using fallback.',err);
+  }
+
   try{
     const files=Array.from({length:6},(_,i)=>`media/mid-${String(i).padStart(2,'0')}.b64`);
-    const parts=await Promise.all(files.map(async f=>{const r=await fetch(f,{cache:'force-cache'});if(!r.ok)throw new Error(f);return (await r.text()).trim()}));
+    const parts=await Promise.all(files.map(async f=>{
+      const r=await fetch(f,{cache:'force-cache'});
+      if(!r.ok)throw new Error(f);
+      return (await r.text()).trim();
+    }));
     const raw=atob(parts.join(''));
     const bytes=new Uint8Array(raw.length);
     for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
-    mediaUrl=URL.createObjectURL(new Blob([bytes],{type:'video/mp4'}));
-    [heroVideo,...lightingVideos].forEach(v=>{if(!v)return;v.src=mediaUrl;v.load();});
-  }catch(err){console.error('EDVILL preview video load failed',err);if(heroVideoStatus)heroVideoStatus.textContent='A hero videó nem tölthető be';}
+    applyMediaUrl(URL.createObjectURL(new Blob([bytes],{type:'video/mp4'})));
+  }catch(err){
+    console.error('EDVILL preview video load failed',err);
+    if(heroVideoStatus)heroVideoStatus.textContent='A hero videó nem tölthető be';
+  }
 }
 
 function seekHero(progress){
