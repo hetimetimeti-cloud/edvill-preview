@@ -70,13 +70,21 @@ function injectReferenceExplorerStyles(){
   `;document.head.appendChild(style)
 }
 
+function pruneRedundantSections(){
+  $('.why-section')?.remove();
+  $('.references')?.remove();
+  const processLabel=$('.process-section .eyebrow');if(processLabel)processLabel.textContent='05 — Hogyan indul?';
+  const storeLabels=$$('.store-section .eyebrow');if(storeLabels[0])storeLabels[0].textContent='06 — Szaküzlet';if(storeLabels[1])storeLabels[1].textContent='07 — Webshop';
+  const contactLabel=$('.closing-cta .eyebrow');if(contactLabel)contactLabel.textContent='08 — Kapcsolat';
+}
+
 function initReferenceExplorer(){
-  const services=$('.section-services');if(!services||$('#referenceExplorer'))return;
+  const services=$('.section-services');if(!services||$('#referenciak'))return;
   injectReferenceExplorerStyles();
   const cards=referenceProjects.map((p,i)=>`<button class="reference-card ${i===0?'is-featured is-active':''}" type="button" data-reference="${p.key}" aria-pressed="${i===0?'true':'false'}"><img src="${p.image}" alt="EDVILL referencia — ${p.name}" loading="${i===0?'eager':'lazy'}"><span class="reference-card-copy"><span><small>${p.tag}</small><strong>${p.name}</strong></span><span class="reference-card-arrow">↗</span></span></button>`).join('');
   const first=referenceProjects[0];
-  services.insertAdjacentHTML('beforebegin',`<section class="reference-explorer reveal" id="referenceExplorer"><div class="container"><div class="reference-explorer-head"><div class="eyebrow">01A — Valódi terek</div><div><h2>Terek, amiket már fényre hangoltunk.</h2><p class="reference-explorer-intro">Minden kép az eredeti EDVILL referenciaanyagból származik. Válassz egy projektet — a kiemelt rész az adott tér világítási logikáját mutatja.</p></div></div><div class="reference-explorer-grid">${cards}</div><div class="reference-detail" aria-live="polite"><div class="reference-detail-main"><span class="reference-detail-kicker" id="referenceDetailTag">${first.tag}</span><div><h3 id="referenceDetailTitle">${first.name}</h3><p id="referenceDetailLead">${first.lead}</p></div></div><div class="reference-detail-meta"><span id="referenceDetailMeta">${first.detail}</span><a href="#megoldasok">Kapcsolódó megoldások →</a></div></div></div></section>`);
-  const section=$('#referenceExplorer');observer.observe(section);
+  services.insertAdjacentHTML('beforebegin',`<section class="reference-explorer reveal" id="referenciak"><div class="container"><div class="reference-explorer-head"><div class="eyebrow">01A — Valódi terek</div><div><h2>Terek, amiket már fényre hangoltunk.</h2><p class="reference-explorer-intro">Minden kép az eredeti EDVILL referenciaanyagból származik. Válassz egy projektet — a kiemelt rész az adott tér világítási logikáját mutatja.</p></div></div><div class="reference-explorer-grid">${cards}</div><div class="reference-detail" aria-live="polite"><div class="reference-detail-main"><span class="reference-detail-kicker" id="referenceDetailTag">${first.tag}</span><div><h3 id="referenceDetailTitle">${first.name}</h3><p id="referenceDetailLead">${first.lead}</p></div></div><div class="reference-detail-meta"><span id="referenceDetailMeta">${first.detail}</span><a href="#megoldasok">Kapcsolódó megoldások →</a></div></div></div></section>`);
+  const section=$('#referenciak');observer.observe(section);
   const buttons=[...section.querySelectorAll('.reference-card')];
   const tag=$('#referenceDetailTag'),title=$('#referenceDetailTitle'),lead=$('#referenceDetailLead'),meta=$('#referenceDetailMeta');
   const selectProject=key=>{const p=referenceProjects.find(x=>x.key===key);if(!p)return;buttons.forEach(btn=>{const active=btn.dataset.reference===key;btn.classList.toggle('is-active',active);btn.setAttribute('aria-pressed',String(active))});tag.textContent=p.tag;title.textContent=p.name;lead.textContent=p.lead;meta.textContent=p.detail};
@@ -85,5 +93,6 @@ function initReferenceExplorer(){
 
 const observer=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('is-visible');observer.unobserve(e.target)}}),{threshold:.12,rootMargin:'0px 0px -40px 0px'});$$('.reveal').forEach(el=>observer.observe(el));
 const menuButton=$('.menu-button'),mobileMenu=$('#mobileMenu');menuButton?.addEventListener('click',()=>{const open=mobileMenu.classList.toggle('is-open');menuButton.setAttribute('aria-expanded',String(open));mobileMenu.setAttribute('aria-hidden',String(!open))});mobileMenu?.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{mobileMenu.classList.remove('is-open');menuButton.setAttribute('aria-expanded','false');mobileMenu.setAttribute('aria-hidden','true')}));
+pruneRedundantSections();
 initReferenceExplorer();
 applyHQVideo();
