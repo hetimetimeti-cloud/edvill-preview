@@ -17,7 +17,7 @@ const moodMap={
 
 async function loadPreviewVideo(){
   try{
-    const files=Array.from({length:14},(_,i)=>`media/video-${String(i).padStart(2,'0')}.b64`);
+    const files=Array.from({length:6},(_,i)=>`media/mid-${String(i).padStart(2,'0')}.b64`);
     const parts=await Promise.all(files.map(async f=>{const r=await fetch(f,{cache:'force-cache'});if(!r.ok)throw new Error(f);return (await r.text()).trim()}));
     const raw=atob(parts.join(''));
     const bytes=new Uint8Array(raw.length);
