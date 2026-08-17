@@ -12,7 +12,7 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -27,17 +27,19 @@ jobs:
       - name: Prepare EDVILL reference images
         shell: bash
         run: |
-          set -euo pipefail
           mkdir -p assets/references
           UA='Mozilla/5.0 EDVILL-GitHub-Pages'
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/09/IMG_20240808_200700-scaled.jpg' -o assets/references/terasz.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/09/11423756_994880383931379_774657023032516576_o-1-1024x614-1.jpg' -o assets/references/konyha.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/09/IMG_9521-1024x576-1.jpg' -o assets/references/rgb.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/07/448985721_1218784492872350_2689812110299741548_n-edited.jpg' -o assets/references/szorakozohely.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/08/20201213_160905-1-scaled.jpg' -o assets/references/kert.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/07/IMG_9529-1024x768.jpg' -o assets/references/mennyezeti-led.jpg
-          curl -A "$UA" -fsSL --retry 3 --retry-delay 2 'https://edvill.hu/wp-content/uploads/2024/08/20201213_160915-1-1024x512.jpg' -o assets/references/haloszoba.jpg
-          test -s assets/references/furdoszoba.jpg
+          fetch_ref() {
+            curl -A "$UA" -fsSL --connect-timeout 4 --max-time 15 --retry 1 "$1" -o "$2" || rm -f "$2"
+          }
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/09/IMG_20240808_200700-scaled.jpg' assets/references/terasz.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/09/11423756_994880383931379_774657023032516576_o-1-1024x614-1.jpg' assets/references/konyha.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/09/IMG_9521-1024x576-1.jpg' assets/references/rgb.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/07/448985721_1218784492872350_2689812110299741548_n-edited.jpg' assets/references/szorakozohely.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/08/20201213_160905-1-scaled.jpg' assets/references/kert.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/07/IMG_9529-1024x768.jpg' assets/references/mennyezeti-led.jpg &
+          fetch_ref 'https://edvill.hu/wp-content/uploads/2024/08/20201213_160915-1-1024x512.jpg' assets/references/haloszoba.jpg &
+          wait || true
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
